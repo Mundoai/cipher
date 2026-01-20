@@ -264,8 +264,9 @@ export class ConversationSession {
 							cache: { type: 'in-memory' as const },
 						});
 						await primaryStorage.connect();
+						const backupDbPath = process.env.CIPHER_BACKUP_DB_PATH || './.cipher/database/cipher-backup.db';
 						const backupStorage = new StorageManager({
-							database: { type: 'sqlite' as const, path: './cipher-backup.db' },
+							database: { type: 'sqlite' as const, path: backupDbPath },
 							cache: { type: 'in-memory' as const },
 						});
 						await backupStorage.connect();
