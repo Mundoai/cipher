@@ -133,7 +133,7 @@ export class WeaviateBackend implements VectorStore {
 					new Error('Missing connection configuration')
 				);
 			}
-			console.log('Connection config: ', this.connectionConfig);
+			this.logger.debug(`${LOG_PREFIXES.WEAVIATE} Connection config`, { config: this.connectionConfig });
 
 			this.client = weaviate.client(this.connectionConfig);
 			// Verify connection

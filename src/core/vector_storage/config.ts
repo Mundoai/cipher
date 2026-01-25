@@ -562,7 +562,6 @@ const BackendConfigSchema = z
 		// Validate Faiss backend requirements
 		if (data.type === 'faiss') {
 			if (!data.baseStoragePath) {
-				console.log('Faiss backend requires baseStoragePath');
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
 					message: "Faiss backend requires 'baseStoragePath' to be specified",

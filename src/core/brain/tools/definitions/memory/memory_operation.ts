@@ -1443,7 +1443,7 @@ async function rewriteUserQuery(
 ): Promise<{ queries: string[] }> {
 	// Add debugging to track function calls
 	const callId = Math.random().toString(36).substring(7);
-	console.log(`🔄 [${callId}] rewriteUserQuery called with: "${originalInput}"`);
+	logger.debug(`[${callId}] rewriteUserQuery called with: "${originalInput.substring(0, 100)}"`);
 
 	try {
 		const rewritePrompt = `
@@ -1502,23 +1502,23 @@ async function rewriteUserQuery(
 					array.indexOf(query) === index
 			); // Remove duplicates
 
-		console.log(`🔄 [${callId}] Parsed queries:`, queries);
-		console.log(`🔄 [${callId}] Query count: ${queries.length}`);
+		logger.debug(`[${callId}] Parsed queries: ${JSON.stringify(queries)}`);
+		logger.debug(`[${callId}] Query count: ${queries.length}`);
 
 		// Ensure we have at least one query (fallback to original)
 		if (queries.length === 0) {
-			console.log(`🔄 [${callId}] No queries parsed, falling back to original input`);
+			logger.debug(`[${callId}] No queries parsed, falling back to original input`);
 			return {
 				queries: [originalInput],
 			};
 		}
 
-		console.log(`🔄 [${callId}] Returning ${queries.length} refined queries`);
+		logger.debug(`[${callId}] Returning ${queries.length} refined queries`);
 		return {
 			queries: queries,
 		};
 	} catch (error) {
-		console.log(`🔄 [${callId}] Error in rewriteUserQuery:`, error);
+		logger.debug(`[${callId}] Error in rewriteUserQuery: ${error instanceof Error ? error.message : String(error)}`);
 		logger.warn('MemorySearch: Query rewriting failed', {
 			originalInput: originalInput.substring(0, 100),
 			error: error instanceof Error ? error.message : String(error),

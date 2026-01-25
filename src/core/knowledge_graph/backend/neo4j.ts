@@ -1012,7 +1012,6 @@ export class Neo4jBackend implements KnowledgeGraph {
 
 			this.logger.debug(`${LOG_PREFIXES.NEO4J} Created indexes`);
 		} catch (_error) {
-			console.log(_error);
 			this.logger.warn(`${LOG_PREFIXES.NEO4J} Could not create indexes:`, _error);
 		} finally {
 			await session.close();

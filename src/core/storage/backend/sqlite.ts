@@ -189,8 +189,7 @@ export class SqliteBackend implements DatabaseBackend {
 				platform: process.platform,
 				arch: process.arch,
 			};
-			console.log('Failed to connect to SQLite database', errorDetails);
-			// this.logger.error('Failed to connect to SQLite database', errorDetails);
+			this.logger.error('Failed to connect to SQLite database', errorDetails);
 
 			throw new StorageConnectionError(
 				`Failed to connect to SQLite database: ${error instanceof Error ? error.message : String(error)}`,

@@ -129,7 +129,7 @@ export function formatToolResult(toolName: string, result: any): string {
 			toolName.includes('query_graph') ||
 			toolName.includes('get_neighbors')
 		) {
-			console.log('Knowledge graph result');
+			logger.debug('Formatting knowledge graph result');
 			return formatKnowledgeGraphResult(result as KnowledgeGraphResult);
 		}
 
@@ -244,7 +244,7 @@ function formatMemorySearchResult(result: MemorySearchResult): string {
  */
 function formatKnowledgeGraphResult(result: KnowledgeGraphResult): string {
 	if (!result.success) {
-		console.log('Knowledge graph result', result.error);
+		logger.debug('Knowledge graph query failed', { error: result.error });
 		return chalk.red(`❌ Graph query failed: ${result.error || 'Unknown error'}`);
 	}
 

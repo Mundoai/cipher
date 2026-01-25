@@ -445,8 +445,10 @@ export async function createAgentServices(
 					const accessKeyId = embeddingConfig.accessKeyId || process.env.AWS_ACCESS_KEY_ID;
 					const secretAccessKey =
 						embeddingConfig.secretAccessKey || process.env.AWS_SECRET_ACCESS_KEY;
-					console.log('accessKeyId', accessKeyId);
-					console.log('secretAccessKey', secretAccessKey);
+					logger.debug('AWS credentials check', {
+						accessKeyIdSet: !!accessKeyId,
+						secretAccessKeySet: !!secretAccessKey,
+					});
 					if (
 						!accessKeyId ||
 						accessKeyId.trim() === '' ||

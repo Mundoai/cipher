@@ -61,10 +61,6 @@ export class PineconeBackend implements VectorStore {
 			indexName: this.indexName,
 			dimension: this.dimension,
 		});
-		console.log('PineconeBackend initialized', {
-			indexName: this.indexName,
-			dimension: this.dimension,
-		});
 	}
 
 	/**
@@ -205,10 +201,10 @@ export class PineconeBackend implements VectorStore {
 		this.logger.info(`${LOG_PREFIXES.PINECONE} Connecting to Pinecone`);
 
 		try {
-			console.log('Trying to list indexes');
+			this.logger.debug(`${LOG_PREFIXES.PINECONE} Listing indexes`);
 			const indexList = await this.client.listIndexes();
 			const indexExists = indexList.indexes?.some(index => index.name === this.indexName);
-			console.log('indexExists', indexExists);
+			this.logger.debug(`${LOG_PREFIXES.PINECONE} Index exists: ${indexExists}`);
 			if (!indexExists) {
 				this.logger.info(
 					`${LOG_PREFIXES.PINECONE} Index '${this.indexName}' does not exist, creating...`

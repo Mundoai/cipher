@@ -853,7 +853,7 @@ export function getWorkspaceVectorStoreConfigFromEnv(agentConfig?: any): VectorS
 		usingWorkspaceSpecificType: !!env.WORKSPACE_VECTOR_STORE_TYPE,
 		usingWorkspaceSpecificCollection: !!env.WORKSPACE_VECTOR_STORE_COLLECTION,
 	});
-	console.log('storeType', storeType);
+	logger.debug('Workspace vector store type:', { storeType });
 	if (storeType === 'qdrant') {
 		const host = env.WORKSPACE_VECTOR_STORE_HOST || env.VECTOR_STORE_HOST;
 		const url = env.WORKSPACE_VECTOR_STORE_URL || env.VECTOR_STORE_URL;
@@ -903,7 +903,7 @@ export function getWorkspaceVectorStoreConfigFromEnv(agentConfig?: any): VectorS
 
 		if (!url && !host) {
 			// Return in-memory config with fallback marker
-			console.log('Milvus backend not initialzed, returning in-memory config with fallback marker');
+			logger.debug('Milvus backend not initialized, returning in-memory config with fallback marker');
 			return {
 				type: 'in-memory',
 				collectionName,

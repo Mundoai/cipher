@@ -239,7 +239,7 @@ export async function createEmbedder(config: BackendConfig): Promise<Embedder> {
  * Create embedder from environment configuration
  */
 export async function createEmbedderFromEnv(): Promise<{ embedder: Embedder; info: any } | null> {
-	console.log('Attempting to parse embedding config from environment variables...');
+	logger.debug('Attempting to parse embedding config from environment variables...');
 	const envConfig = parseEmbeddingConfigFromEnv();
 	if (!envConfig) {
 		logger.debug('No embedding configuration found in environment');
