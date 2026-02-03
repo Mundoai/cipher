@@ -31,12 +31,18 @@ function isApiRoute(url) {
 
 function proxyRequest(req, res, targetPort) {
 	// Rewrite Origin/Referer for API requests to bypass CORS
+	// The API server allows http://localhost:3000 and http://localhost:3001
 	const headers = { ...req.headers };
 	if (targetPort === API_PORT) {
-		headers.origin = `http://localhost:${UI_PORT}`;
-		if (headers.referer) {
-			headers.referer = headers.referer.replace(/https?:\/\/[^/]+/, `http://localhost:${UI_PORT}`);
+		const internalOrigin = `http://localhost:${API_PORT}`;
+		if (headers.origin) {
+			headers.origin = internalOrigin;
 		}
+		if (headers.referer) {
+			headers.referer = headers.referer.replace(/https?:\/\/[^/]+/, internalOrigin);
+		}
+		// Remove host header mismatch
+		headers.host = `localhost:${API_PORT}`;
 	}
 
 	const options = {
