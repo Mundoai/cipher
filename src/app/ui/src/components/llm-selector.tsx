@@ -94,14 +94,40 @@ export function LLMSelector({ isOpen, onClose, currentSessionId, onConfigChange 
         ])
 
         if (currentRes.ok) {
-          const current = await currentRes.json()
-          setCurrentConfig(current)
-          setHasExistingApiKey(!!current.config.apiKey)
+          const currentData = await currentRes.json()
+          // Backend returns { success, data: { llmConfig: { provider, model, ... } } }
+          const llmConfig = currentData?.data?.llmConfig || currentData?.llmConfig || currentData
+          const normalizedConfig: LLMConfig = {
+            config: {
+              provider: llmConfig.provider || '',
+              model: llmConfig.model || '',
+              apiKey: llmConfig.apiKey,
+              baseURL: llmConfig.baseURL,
+            },
+            serviceInfo: {
+              router: 'vercel',
+            },
+          }
+          setCurrentConfig(normalizedConfig)
+          setHasExistingApiKey(!!llmConfig.apiKey && llmConfig.apiKey !== '***')
         }
 
         if (providersRes.ok) {
           const providersData = await providersRes.json()
-          setProviders(providersData.providers)
+          // Backend returns { success, data: { providers: { ... } } }
+          const rawProviders = providersData?.data?.providers || providersData?.providers || {}
+          // Ensure each provider has supportedRouters and supportsBaseURL
+          const normalized: Record<string, LLMProvider> = {}
+          for (const [key, value] of Object.entries(rawProviders)) {
+            const p = value as any
+            normalized[key] = {
+              name: p.name || key,
+              models: p.models || [],
+              supportedRouters: p.supportedRouters || ['vercel'],
+              supportsBaseURL: p.supportsBaseURL ?? false,
+            }
+          }
+          setProviders(normalized)
         }
       } catch (err) {
         console.error('Failed to fetch LLM data:', err)
@@ -190,14 +216,16 @@ export function LLMSelector({ isOpen, onClose, currentSessionId, onConfigChange 
     setSuccess(null)
 
     try {
-      const requestBody: LLMSwitchRequest = {
+      const requestBody: any = {
         provider: selectedProvider,
         model: selectedModel,
-        router: selectedRouter
       }
 
-      if (apiKey) requestBody.apiKey = apiKey
-      if (baseURL) requestBody.baseURL = baseURL
+      if (apiKey || baseURL) {
+        requestBody.config = {}
+        if (apiKey) requestBody.config.apiKey = apiKey
+        if (baseURL) requestBody.config.baseURL = baseURL
+      }
       if (currentSessionId) requestBody.sessionId = currentSessionId
 
       const response = await fetch('/api/llm/switch', {
@@ -209,10 +237,22 @@ export function LLMSelector({ isOpen, onClose, currentSessionId, onConfigChange 
       const result = await response.json()
 
       if (result.success) {
-        setCurrentConfig(result.config)
-        setSuccess(result.message)
-        onConfigChange?.(result.config)
-        
+        const llmConfig = result?.data?.llmConfig || result?.llmConfig
+        if (llmConfig) {
+          const normalizedConfig: LLMConfig = {
+            config: {
+              provider: llmConfig.provider || selectedProvider,
+              model: llmConfig.model || selectedModel,
+              apiKey: llmConfig.apiKey,
+              baseURL: llmConfig.baseURL,
+            },
+            serviceInfo: { router: selectedRouter },
+          }
+          setCurrentConfig(normalizedConfig)
+          onConfigChange?.(normalizedConfig)
+        }
+        setSuccess(result?.data?.message || 'LLM configuration updated successfully')
+
         setTimeout(() => {
           onClose()
           setSuccess(null)

@@ -46,6 +46,8 @@ export function createLlmRoutes(agent: MemAgent): Router {
 					models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'],
 					requiresApiKey: true,
 					description: 'OpenAI GPT models',
+					supportedRouters: ['vercel'],
+					supportsBaseURL: true,
 				},
 				anthropic: {
 					name: 'Anthropic',
@@ -58,10 +60,16 @@ export function createLlmRoutes(agent: MemAgent): Router {
 					],
 					requiresApiKey: true,
 					description: 'Anthropic Claude models',
+					supportedRouters: ['vercel'],
+					supportsBaseURL: false,
 				},
 				openrouter: {
 					name: 'OpenRouter',
 					models: [
+						'nvidia/nemotron-3-nano-30b-a3b:free',
+						'meta-llama/llama-3.3-70b-instruct:free',
+						'google/gemini-2.0-flash-exp:free',
+						'qwen/qwen-2.5-72b-instruct:free',
 						'openai/gpt-4o',
 						'anthropic/claude-3.5-sonnet',
 						'meta-llama/llama-3.1-405b-instruct',
@@ -69,6 +77,8 @@ export function createLlmRoutes(agent: MemAgent): Router {
 					],
 					requiresApiKey: true,
 					description: 'OpenRouter unified API access',
+					supportedRouters: ['vercel'],
+					supportsBaseURL: false,
 				},
 				ollama: {
 					name: 'Ollama',
@@ -83,6 +93,8 @@ export function createLlmRoutes(agent: MemAgent): Router {
 					requiresApiKey: false,
 					description: 'Local Ollama models',
 					note: 'Requires Ollama server running locally',
+					supportedRouters: ['vercel'],
+					supportsBaseURL: true,
 				},
 			};
 
@@ -220,7 +232,7 @@ async function getCurrentLLMConfig(req: Request, res: Response, agent: MemAgent)
  */
 async function switchLLMConfig(req: Request, res: Response, agent: MemAgent): Promise<void> {
 	try {
-		const { provider, model, sessionId } = req.body;
+		const { provider, model, sessionId, config } = req.body;
 
 		logger.info('Switching LLM configuration', {
 			requestId: req.requestId,
@@ -232,6 +244,8 @@ async function switchLLMConfig(req: Request, res: Response, agent: MemAgent): Pr
 		const llmConfig: Record<string, unknown> = {};
 		if (provider) llmConfig.provider = provider;
 		if (model) llmConfig.model = model;
+		if (config?.apiKey) llmConfig.apiKey = config.apiKey;
+		if (config?.baseURL) llmConfig.baseURL = config.baseURL;
 
 		await agent.switchLLM(llmConfig, sessionId);
 

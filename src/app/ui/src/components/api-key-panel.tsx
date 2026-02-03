@@ -317,6 +317,40 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
                 <AlertTriangle className="w-3 h-3" />
                 Store this key securely. It cannot be retrieved later.
               </p>
+              <div className="border-t pt-3 space-y-2">
+                <p className="text-xs font-medium">Connect your IDE via MCP:</p>
+                <div className="relative">
+                  <code className="block text-[10px] bg-muted p-2 rounded font-mono break-all whitespace-pre">
+{`{
+  "mcpServers": {
+    "cipher": {
+      "type": "sse",
+      "url": "${typeof window !== 'undefined' ? window.location.origin : ''}/api/mcp/sse"
+    }
+  }
+}`}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-1 right-1 h-5 w-5 p-0"
+                    onClick={() => copyToClipboard(JSON.stringify({
+                      mcpServers: {
+                        cipher: {
+                          type: "sse",
+                          url: `${typeof window !== 'undefined' ? window.location.origin : ''}/api/mcp/sse`
+                        }
+                      }
+                    }, null, 2))}
+                    title="Copy MCP config"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Add to .mcp.json in your project root (Claude Code, Cursor, VS Code)
+                </p>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">

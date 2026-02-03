@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { RefreshCw, Zap, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { LLMSelector } from "./llm-selector"
 
 interface LlmConfig {
   provider: string
@@ -20,6 +21,7 @@ export function LlmModelDisplay({ className }: LlmModelDisplayProps) {
   const [llmConfig, setLlmConfig] = React.useState<LlmConfig | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [isSelectorOpen, setIsSelectorOpen] = React.useState(false)
 
   const fetchLlmConfig = React.useCallback(async () => {
     try {
@@ -123,9 +125,11 @@ export function LlmModelDisplay({ className }: LlmModelDisplayProps) {
 
   return (
     <div className={cn("flex items-center space-x-2", className)}>
-      <Badge 
-        variant="secondary" 
-        className="text-xs flex items-center gap-1 bg-muted/50 text-muted-foreground border-border/50"
+      <Badge
+        variant="secondary"
+        className="text-xs flex items-center gap-1 bg-muted/50 text-muted-foreground border-border/50 cursor-pointer hover:bg-muted/80 transition-colors"
+        onClick={() => setIsSelectorOpen(true)}
+        title="Click to switch LLM model"
       >
         {getProviderIcon(llmConfig.provider)}
         <span className="font-medium">{getProviderDisplayName(llmConfig.provider)}</span>
@@ -141,6 +145,11 @@ export function LlmModelDisplay({ className }: LlmModelDisplayProps) {
       >
         <RefreshCw className="w-3 h-3" />
       </Button>
+      <LLMSelector
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        onConfigChange={() => fetchLlmConfig()}
+      />
     </div>
   )
 }

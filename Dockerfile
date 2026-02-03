@@ -81,4 +81,4 @@ EXPOSE $PORT
 # Server mode: configurable via CIPHER_MODE env var (api or ui)
 # In UI mode: starts API on API_PORT, Next.js on UI_PORT, reverse proxy on PORT
 # In API mode: starts API directly on PORT
-CMD ["sh", "-c", "if [ \"$CIPHER_MODE\" = \"ui\" ]; then node dist/src/app/index.cjs --mode api --port ${API_PORT:-3001} --host 0.0.0.0 --agent $CONFIG_FILE & PORT=${UI_PORT:-3002} HOSTNAME=0.0.0.0 node dist/src/app/ui/.next/standalone/server.js & sleep 2 && node scripts/docker-proxy.cjs; else node dist/src/app/index.cjs --mode $CIPHER_MODE --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE; fi"]
+CMD ["sh", "-c", "if [ \"$CIPHER_MODE\" = \"ui\" ]; then node dist/src/app/index.cjs --mode api --port ${API_PORT:-3001} --host 0.0.0.0 --agent $CONFIG_FILE --mcp-transport-type sse & PORT=${UI_PORT:-3002} HOSTNAME=0.0.0.0 node dist/src/app/ui/.next/standalone/server.js & sleep 2 && node scripts/docker-proxy.cjs; else node dist/src/app/index.cjs --mode $CIPHER_MODE --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE --mcp-transport-type sse; fi"]
