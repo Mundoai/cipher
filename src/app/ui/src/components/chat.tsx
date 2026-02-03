@@ -19,6 +19,7 @@ import { SlidingPanel } from "./sliding-panel"
 import { ErrorNotification } from "./error-notification"
 import { SessionPanel } from "./session-panel"
 import { ServersPanel } from "./servers-panel"
+import { ApiKeyPanel } from "./api-key-panel"
 import { MessageList } from "./message-list"
 import { InputArea } from "./input-area"
 
@@ -67,6 +68,7 @@ export function Chat({
   });
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isApiKeysPanelOpen, setIsApiKeysPanelOpen] = useState(false);
 
   // Derived state
   const isWelcomeState = !currentSessionId;
@@ -364,6 +366,7 @@ export function Chat({
   // Toggle handlers
   const toggleSessions = () => setModalStates(prev => ({ ...prev, isSessionsPanelOpen: !prev.isSessionsPanelOpen }));
   const toggleServers = () => setModalStates(prev => ({ ...prev, isServersPanelOpen: !prev.isServersPanelOpen }));
+  const toggleApiKeys = () => setIsApiKeysPanelOpen(prev => !prev);
 
   return (
     <div className="flex h-screen bg-background">
@@ -374,8 +377,10 @@ export function Chat({
           onToggleSearch={() => {}}
           onToggleSessions={toggleSessions}
           onToggleServers={toggleServers}
+          onToggleApiKeys={toggleApiKeys}
           isSessionsPanelOpen={isSessionsPanelOpen}
           isServersPanelOpen={isServersPanelOpen}
+          isApiKeysPanelOpen={isApiKeysPanelOpen}
         />
         
         <div className="flex-1 flex overflow-hidden">
@@ -406,6 +411,12 @@ export function Chat({
             <ServersPanel
               isOpen={isServersPanelOpen}
               onClose={() => setModalStates(prev => ({ ...prev, isServersPanelOpen: false }))}
+            />
+          </SlidingPanel>
+
+          <SlidingPanel isOpen={isApiKeysPanelOpen} width="w-80">
+            <ApiKeyPanel
+              isOpen={isApiKeysPanelOpen}
             />
           </SlidingPanel>
         </div>

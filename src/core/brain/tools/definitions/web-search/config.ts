@@ -17,7 +17,7 @@ export const WebSearchConfigSchema = z.discriminatedUnion('engine', [DuckDuckGoS
 export type WebSearchConfig = z.infer<typeof WebSearchConfigSchema>;
 
 // Input schema for the web search tool
-const WebSearchInputSchema = z.object({
+const _WebSearchInputSchema = z.object({
 	search_term: z
 		.string()
 		.describe(
@@ -37,7 +37,7 @@ const WebSearchInputSchema = z.object({
 		.describe('Enable safe search mode to filter explicit content'),
 });
 
-export type WebSearchInput = z.infer<typeof WebSearchInputSchema>;
+export type WebSearchInput = z.infer<typeof _WebSearchInputSchema>;
 
 export const SearchResultSchema = z.object({
 	title: z.string().describe('The title of the search result'),

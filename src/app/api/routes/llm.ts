@@ -229,16 +229,11 @@ async function switchLLMConfig(req: Request, res: Response, agent: MemAgent): Pr
 			sessionId,
 		});
 
-		// Build LLM config object (not used yet)
-		// const _llmConfig: any = {
-		// 	provider,
-		// 	model,
-		// 	...config,
-		// };
+		const llmConfig: Record<string, unknown> = {};
+		if (provider) llmConfig.provider = provider;
+		if (model) llmConfig.model = model;
 
-		// TODO: Implement switchLLM method on MemAgent
-		// await agent.switchLLM(_llmConfig, sessionId);
-		logger.warn('LLM switching not yet implemented', { provider, model, sessionId });
+		await agent.switchLLM(llmConfig, sessionId);
 
 		// Get updated configuration to return
 		const updatedConfig = agent.getCurrentLLMConfig();

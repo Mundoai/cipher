@@ -8,6 +8,7 @@ import { SlidingPanel } from "./sliding-panel"
 import { ErrorNotification } from "./error-notification"
 import { SessionPanel } from "./session-panel"
 import { ServersPanel } from "./servers-panel"
+import { ApiKeyPanel } from "./api-key-panel"
 import { MessageList } from "./message-list"
 import { InputArea } from "./input-area"
 // import { SearchPanel } from "./search-panel"
@@ -36,6 +37,7 @@ function ChatWithContextInner({ className }: ChatWithContextInnerProps) {
   // State management for UI panels
   const [isSessionsPanelOpen, setIsSessionsPanelOpen] = React.useState(false);
   const [isServersPanelOpen, setIsServersPanelOpen] = React.useState(false);
+  const [isApiKeysPanelOpen, setIsApiKeysPanelOpen] = React.useState(false);
   // const [isSearchPanelOpen, setIsSearchPanelOpen] = React.useState(false);
   // const [isGlobalSearchOpen, setIsGlobalSearchOpen] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -190,6 +192,7 @@ function ChatWithContextInner({ className }: ChatWithContextInnerProps) {
   // const toggleSearch = () => setIsSearchPanelOpen(prev => !prev);
   const toggleSessions = () => setIsSessionsPanelOpen(prev => !prev);
   const toggleServers = () => setIsServersPanelOpen(prev => !prev);
+  const toggleApiKeys = () => setIsApiKeysPanelOpen(prev => !prev);
 
   return (
     <div className={`flex h-screen bg-background ${className || ''}`}>
@@ -200,8 +203,10 @@ function ChatWithContextInner({ className }: ChatWithContextInnerProps) {
           onToggleSearch={() => {}}
           onToggleSessions={toggleSessions}
           onToggleServers={toggleServers}
+          onToggleApiKeys={toggleApiKeys}
           isSessionsPanelOpen={isSessionsPanelOpen}
           isServersPanelOpen={isServersPanelOpen}
+          isApiKeysPanelOpen={isApiKeysPanelOpen}
         />
         
         <div className="flex-1 flex overflow-hidden">
@@ -232,6 +237,12 @@ function ChatWithContextInner({ className }: ChatWithContextInnerProps) {
             <ServersPanel
               isOpen={isServersPanelOpen}
               onClose={() => setIsServersPanelOpen(false)}
+            />
+          </SlidingPanel>
+
+          <SlidingPanel isOpen={isApiKeysPanelOpen} width="w-80">
+            <ApiKeyPanel
+              isOpen={isApiKeysPanelOpen}
             />
           </SlidingPanel>
         </div>

@@ -721,7 +721,7 @@ describe('RedisBackend Vector Storage', () => {
 		});
 
 		it('should handle Redis connection events', () => {
-			const backend = new RedisBackend(config);
+			const _backend = new RedisBackend(config);
 
 			// Test event handlers were registered
 			expect(mockRedisInstance.on).toHaveBeenCalledWith('error', expect.any(Function));

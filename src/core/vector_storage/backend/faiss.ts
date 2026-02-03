@@ -6,7 +6,7 @@ import { LOG_PREFIXES, ERROR_MESSAGES } from '../constants.js';
 import { env } from '../../env.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Index, IndexFlatL2, IndexFlatIP, MetricType } from 'faiss-node';
+import { Index, IndexFlatL2, IndexFlatIP } from 'faiss-node';
 
 /**
  * FaissBackendConfig Interface
@@ -164,7 +164,7 @@ export class FaissBackend implements VectorStore {
 	async search(
 		query: number[],
 		limit: number = 2,
-		filters?: SearchFilters
+		_filters?: SearchFilters
 	): Promise<VectorStoreResult[]> {
 		if (!this.connected) {
 			throw new VectorStoreError(ERROR_MESSAGES.NOT_CONNECTED, 'search');

@@ -675,7 +675,7 @@ export function getVectorStoreConfigFromEnv(agentConfig?: any): VectorStoreConfi
 		};
 	} else if ((storeType as string) === 'faiss') {
 		const baseStoragePath = env.FAISS_BASE_STORAGE_PATH;
-		const envmetric = env.VECTOR_STORE_DISTANCE;
+		const _envmetric = env.VECTOR_STORE_DISTANCE;
 
 		let distance: 'Euclidean' | 'Cosine' | 'IP' = 'Cosine';
 		if (distance) {

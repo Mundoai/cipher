@@ -18,6 +18,16 @@ const API_PORT = parseInt(process.env.API_PORT || '3001', 10);
 const UI_PORT = parseInt(process.env.UI_PORT || '3002', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 
+const ALLOWED_ORIGINS = [
+	'https://cipher.mywebsites.dev',
+	'http://localhost:3000',
+	'http://localhost:3002',
+];
+
+function isAllowedOrigin(origin) {
+	return origin && ALLOWED_ORIGINS.includes(origin);
+}
+
 function isApiRoute(url) {
 	return (
 		url === '/health' ||
@@ -54,11 +64,20 @@ function proxyRequest(req, res, targetPort) {
 	};
 
 	const proxyReq = http.request(options, (proxyRes) => {
-		// For API responses, override CORS headers to allow the real origin
+		// For API responses, set CORS headers only for allowed origins
 		if (targetPort === API_PORT) {
 			const responseHeaders = { ...proxyRes.headers };
-			responseHeaders['access-control-allow-origin'] = req.headers.origin || '*';
-			responseHeaders['access-control-allow-credentials'] = 'true';
+			const requestOrigin = req.headers.origin;
+			if (isAllowedOrigin(requestOrigin)) {
+				responseHeaders['access-control-allow-origin'] = requestOrigin;
+				responseHeaders['access-control-allow-credentials'] = 'true';
+				responseHeaders['access-control-allow-methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+				responseHeaders['access-control-allow-headers'] = 'Content-Type, Authorization';
+			} else {
+				// Remove any CORS headers set by the upstream server
+				delete responseHeaders['access-control-allow-origin'];
+				delete responseHeaders['access-control-allow-credentials'];
+			}
 			res.writeHead(proxyRes.statusCode, responseHeaders);
 		} else {
 			res.writeHead(proxyRes.statusCode, proxyRes.headers);

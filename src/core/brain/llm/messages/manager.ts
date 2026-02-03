@@ -621,7 +621,7 @@ export class ContextManager {
 	private validateAndRepairMessageFlow(messages: InternalMessage[]): InternalMessage[] {
 		const repairedMessages: InternalMessage[] = [];
 		let lastAssistantWithToolCalls: InternalMessage | null = null;
-		let orphanedToolMessages = 0;
+		let _orphanedToolMessages = 0;
 
 		for (let i = 0; i < messages.length; i++) {
 			const message = messages[i];
@@ -658,7 +658,7 @@ export class ContextManager {
 						repairedMessages.push(message);
 					} else {
 						// Orphaned tool message - skip silently
-						orphanedToolMessages++;
+						_orphanedToolMessages++;
 						logger.debug(`[MessageManager] Orphaned tool message: ${message.content}`);
 					}
 					break;

@@ -215,6 +215,16 @@ export class ConversationSession {
 	}
 
 	/**
+	 * Invalidate the cached LLM service so it gets recreated on next use
+	 * with the latest config from the state manager.
+	 */
+	public invalidateLLMService(): void {
+		this._llmService = undefined;
+		this._llmServiceInitialized = false;
+		logger.debug(`Session ${this.id}: LLM service invalidated`);
+	}
+
+	/**
 	 * Lazy initialization of LLM service
 	 */
 	private async getLLMServiceLazy(): Promise<ILLMService> {

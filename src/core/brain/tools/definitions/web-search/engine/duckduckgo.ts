@@ -165,13 +165,13 @@ export class DuckDuckGoPuppeteerProvider extends BaseProvider {
 					},
 					{ timeout: 15000 }
 				);
-			} catch (e) {
+			} catch (_e) {
 				// Try waiting for any content that might contain results
 				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 
 			// Get page content for debugging
-			const pageContent = await page.content();
+			const _pageContent = await page.content();
 			// Extract results using Puppeteer's page evaluation
 			const evaluationResult = await page.evaluate(
 				(maxResults: number) => {
@@ -394,7 +394,7 @@ export class DuckDuckGoPuppeteerProvider extends BaseProvider {
 									console.warn(
 										`DuckDuckGo Puppeteer: Added diverse result from ${domain}: "${title}"`
 									);
-								} catch (urlError) {
+								} catch (_urlError) {
 									console.warn(
 										`DuckDuckGo Puppeteer: Invalid URL for result: "${href}" - "${title}"`
 									);

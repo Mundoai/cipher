@@ -8,7 +8,6 @@ import { Logger, createLogger } from '../../logger/index.js';
 import { LOG_PREFIXES, ERROR_MESSAGES } from '../constants.js';
 import { env } from '../../env.js';
 import { v5 as uuidv5 } from 'uuid';
-import { string } from 'zod';
 
 const weaviate = require('weaviate-ts-client').default;
 
@@ -70,7 +69,7 @@ export class WeaviateBackend implements VectorStore {
 		return uuidv5(id.toString(), WEAVIATE_UUID_NAMESPACE);
 	}
 
-	private validateDimension(vector: number[], operation: string): void {
+	private validateDimension(vector: number[], _operation: string): void {
 		if (vector.length !== this.dimension) {
 			throw new VectorDimensionError(
 				`${ERROR_MESSAGES.INVALID_DIMENSION}: expected ${this.dimension}, got ${vector.length}`,

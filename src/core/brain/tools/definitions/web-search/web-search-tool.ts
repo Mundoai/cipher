@@ -5,8 +5,6 @@ import { createLogger } from '../../../../logger/index.js';
 import { SearchOptions, SearchResponse } from './types.js';
 import { WebSearchInput } from './config.js';
 
-import { InternalSearchResult } from './types.js';
-
 const logger = createLogger({ level: process.env.LOG_LEVEL || 'info' });
 
 // Global web search manager instance

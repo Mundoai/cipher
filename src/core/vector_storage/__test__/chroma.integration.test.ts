@@ -8,7 +8,7 @@
  * docker run -p 8000:8000 chromadb/chroma:latest
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { ChromaBackend } from '../backend/chroma.js';
 import { DefaultChromaPayloadAdapter } from '../backend/chroma-payload-adapter.js';
 import type { ChromaBackendConfig } from '../backend/types.js';

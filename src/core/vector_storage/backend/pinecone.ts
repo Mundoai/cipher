@@ -118,7 +118,7 @@ export class PineconeBackend implements VectorStore {
 	/**
 	 * Validate vector dimension
 	 */
-	private validateDimension(vector: number[], operation: string): void {
+	private validateDimension(vector: number[], _operation: string): void {
 		if (vector.length !== this.dimension) {
 			throw new VectorDimensionError(
 				`${ERROR_MESSAGES.INVALID_DIMENSION}: expected ${this.dimension}, got ${vector.length}`,
@@ -170,7 +170,7 @@ export class PineconeBackend implements VectorStore {
 				metric: this.config.metric || 'cosine',
 			});
 			const Cloudprovider = this.getCloudprovider(this.provider);
-			const result = await this.client.createIndex({
+			const _result = await this.client.createIndex({
 				name: this.indexName,
 				dimension: this.dimension,
 				metric: (this.config.metric || 'cosine') as 'cosine' | 'euclidean' | 'dotproduct',
@@ -523,7 +523,7 @@ export class PineconeBackend implements VectorStore {
 
 	async list(
 		filters?: SearchFilters,
-		limit: number = 10000
+		_limit: number = 10000
 	): Promise<[VectorStoreResult[], number]> {
 		// Pinecone doesn't support direct listing
 		// This is a limitation of the Pinecone service

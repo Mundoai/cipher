@@ -14,8 +14,9 @@ mcpServers: {}
 # Choose ONLY ONE of the following LLM providers
 llm:
   # Using FREE OpenRouter model (mandatory)
+  # Nemotron 3 Nano: 256K context, native tool calling, clean code output
   provider: openrouter
-  model: meta-llama/llama-3.3-70b-instruct:free
+  model: nvidia/nemotron-3-nano-30b-a3b:free
   apiKey: $OPENROUTER_API_KEY
   maxIterations: 50
 

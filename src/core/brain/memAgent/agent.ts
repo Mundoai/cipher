@@ -475,6 +475,32 @@ export class MemAgent {
 		return structuredClone(this.stateManager.getLLMConfig());
 	}
 
+	/**
+	 * Switch LLM configuration at runtime. Updates the config and invalidates
+	 * cached LLM services so they get recreated with the new config.
+	 */
+	public async switchLLM(newConfig: Partial<LLMConfig>, sessionId?: string): Promise<void> {
+		this.ensureStarted();
+		this.stateManager.updateLLMConfig(newConfig, sessionId);
+
+		// Invalidate cached LLM services in affected sessions
+		if (sessionId) {
+			const session = await this.sessionManager.getSession(sessionId);
+			if (session) {
+				session.invalidateLLMService();
+			}
+		} else {
+			// Global change - invalidate all active sessions
+			const activeIds = await this.sessionManager.getActiveSessionIds();
+			for (const id of activeIds) {
+				const session = await this.sessionManager.getSession(id);
+				if (session) {
+					session.invalidateLLMService();
+				}
+			}
+		}
+	}
+
 	public async connectMcpServer(name: string, config: McpServerConfig): Promise<void> {
 		this.ensureStarted();
 		try {

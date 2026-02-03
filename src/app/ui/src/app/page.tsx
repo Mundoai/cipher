@@ -7,6 +7,7 @@ import { SlidingPanel } from "@/components/sliding-panel";
 import { ErrorNotification } from "@/components/error-notification";
 import { SessionPanel } from "@/components/session-panel";
 import { ServersPanel } from "@/components/servers-panel";
+import { ApiKeyPanel } from "@/components/api-key-panel";
 import { MessageList } from "@/components/message-list";
 import { InputArea } from "@/components/input-area";
 import { QuickAction } from "@/types/chat";
@@ -28,6 +29,7 @@ function MainChatInterface() {
   // State management for UI panels
   const [isSessionsPanelOpen, setIsSessionsPanelOpen] = useState(false);
   const [isServersPanelOpen, setIsServersPanelOpen] = useState(false);
+  const [isApiKeysPanelOpen, setIsApiKeysPanelOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Show session sidebar by default on page load
@@ -111,6 +113,7 @@ function MainChatInterface() {
   };
   const toggleSessions = () => setIsSessionsPanelOpen(prev => !prev);
   const toggleServers = () => setIsServersPanelOpen(prev => !prev);
+  const toggleApiKeys = () => setIsApiKeysPanelOpen(prev => !prev);
 
   return (
     <div className="flex h-screen bg-background">
@@ -121,29 +124,31 @@ function MainChatInterface() {
           onToggleSearch={toggleSearch}
           onToggleSessions={toggleSessions}
           onToggleServers={toggleServers}
+          onToggleApiKeys={toggleApiKeys}
           isSessionsPanelOpen={isSessionsPanelOpen}
           isServersPanelOpen={isServersPanelOpen}
+          isApiKeysPanelOpen={isApiKeysPanelOpen}
         />
-        
+
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col">
             {isWelcomeState ? (
               <WelcomeScreen quickActions={quickActions} />
             ) : (
-              <MessageList 
-                messages={messages.map(convertChatMessageToMessage)} 
+              <MessageList
+                messages={messages.map(convertChatMessageToMessage)}
                 className="flex-1"
                 maxHeight="h-full"
               />
             )}
             <div className="flex-shrink-0">
-              <InputArea 
+              <InputArea
                 onSend={handleSend}
                 disabled={status !== 'open'}
               />
             </div>
           </div>
-          
+
           <SlidingPanel isOpen={isSessionsPanelOpen} width="w-80">
             <SessionPanel
               isOpen={isSessionsPanelOpen}
@@ -154,16 +159,22 @@ function MainChatInterface() {
               variant="inline"
             />
           </SlidingPanel>
-          
+
           <SlidingPanel isOpen={isServersPanelOpen} width="w-80">
             <ServersPanel
               isOpen={isServersPanelOpen}
               onClose={() => setIsServersPanelOpen(false)}
             />
           </SlidingPanel>
+
+          <SlidingPanel isOpen={isApiKeysPanelOpen} width="w-80">
+            <ApiKeyPanel
+              isOpen={isApiKeysPanelOpen}
+            />
+          </SlidingPanel>
         </div>
 
-        <ErrorNotification 
+        <ErrorNotification
           message={errorMessage}
           onDismiss={() => setErrorMessage(null)}
         />

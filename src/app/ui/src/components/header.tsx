@@ -6,14 +6,16 @@ import { HeaderProps } from "@/types/chat"
 import { ActionBar } from "./action-bar"
 import { LlmModelDisplay } from "./llm-model-display"
 
-export function Header({ 
-  currentSessionId, 
-  isWelcomeState, 
+export function Header({
+  currentSessionId,
+  isWelcomeState,
   onToggleSearch,
   onToggleSessions,
   onToggleServers,
+  onToggleApiKeys,
   isSessionsPanelOpen,
-  isServersPanelOpen 
+  isServersPanelOpen,
+  isApiKeysPanelOpen
 }: HeaderProps) {
   return (
     <header className="shrink-0 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -32,18 +34,20 @@ export function Header({
                 {currentSessionId}
               </Badge>
             )}
-            
+
             {/* LLM Model Display - Always show */}
             <LlmModelDisplay />
           </div>
         </div>
 
-        <ActionBar 
+        <ActionBar
           onToggleSearch={onToggleSearch}
           onToggleSessions={onToggleSessions}
           onToggleServers={onToggleServers}
+          onToggleApiKeys={onToggleApiKeys}
           isSessionsPanelOpen={isSessionsPanelOpen}
           isServersPanelOpen={isServersPanelOpen}
+          isApiKeysPanelOpen={isApiKeysPanelOpen}
         />
       </div>
     </header>

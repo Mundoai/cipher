@@ -65,8 +65,10 @@ export interface HeaderProps {
 	onToggleSearch: () => void;
 	onToggleSessions: () => void;
 	onToggleServers: () => void;
+	onToggleApiKeys: () => void;
 	isSessionsPanelOpen: boolean;
 	isServersPanelOpen: boolean;
+	isApiKeysPanelOpen: boolean;
 }
 
 export interface WelcomeScreenProps {
@@ -89,8 +91,10 @@ export interface ActionBarProps {
 	onToggleSearch: () => void;
 	onToggleSessions: () => void;
 	onToggleServers: () => void;
+	onToggleApiKeys: () => void;
 	isSessionsPanelOpen: boolean;
 	isServersPanelOpen: boolean;
+	isApiKeysPanelOpen: boolean;
 }
 
 export interface QuickActionCardProps {

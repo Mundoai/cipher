@@ -170,6 +170,18 @@ export class OpenRouterService implements ILLMService {
 			// Handle API errors
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			logger.error(`Error in OpenRouter service API call: ${errorMessage}`, { error });
+
+			// Emit LLM response error event so the UI can clear the thinking state
+			if (this.eventManager && sessionId) {
+				this.eventManager.emitSessionEvent(sessionId, SessionEvents.LLM_RESPONSE_ERROR, {
+					sessionId,
+					messageId,
+					model: this.model,
+					error: errorMessage,
+					timestamp: Date.now(),
+				});
+			}
+
 			await this.contextManager.addAssistantMessage(`Error processing request: ${errorMessage}`);
 			return `Error processing request: ${errorMessage}`;
 		}

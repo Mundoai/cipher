@@ -3,7 +3,7 @@ import { LOG_PREFIXES } from './constants.js';
 import { WebSearchConfig, WebSearchConfigSchema } from './config.js';
 import { BaseProvider } from './engine/base.js';
 import { createWebSearchProvider } from './factory.js';
-import { SearchOptions, SearchResponse, SearchResult, InternalSearchResult } from './types.js';
+import { SearchOptions, SearchResponse, InternalSearchResult } from './types.js';
 
 export class WebSearchManager {
 	private config: WebSearchConfig;

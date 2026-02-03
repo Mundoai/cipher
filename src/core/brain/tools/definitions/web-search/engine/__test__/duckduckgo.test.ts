@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import { DuckDuckGoPuppeteerProvider } from '../duckduckgo.js';
-import { SearchOptions, InternalSearchResult, ExtractedContent } from '../../types.js';
+import { SearchOptions, ExtractedContent } from '../../types.js';
 import * as os from 'os';
 import puppeteer from 'puppeteer';
 

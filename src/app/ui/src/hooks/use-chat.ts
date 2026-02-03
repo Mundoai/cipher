@@ -433,7 +433,17 @@ export function useChat(wsUrl: string, options: UseChatOptions = {}) {
 				createdAt: Date.now(),
 			};
 
-			setMessages(ms => [...ms, errorMessage]);
+			setMessages(ms => {
+				// Remove any "thinking" indicators so the UI is no longer stuck
+				const cleaned = ms.filter(
+					m => !(m.role === 'system' && m.content === 'Cipher is thinking...')
+				);
+				return [...cleaned, errorMessage];
+			});
+
+			// Reset streaming state so the input is re-enabled
+			currentStreamingMessage.current = null;
+
 			onError?.(errMsg);
 		},
 		[onError]

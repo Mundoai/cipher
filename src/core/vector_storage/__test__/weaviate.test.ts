@@ -27,7 +27,6 @@ import { WeaviateBackend } from '../backend/weaviate.js';
 
 import {
 	VectorStoreError,
-	VectorStoreConnectionError,
 	VectorDimensionError,
 } from '../backend/types.js';
 

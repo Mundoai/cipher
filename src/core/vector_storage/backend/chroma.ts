@@ -20,7 +20,6 @@ import type {
 	VectorStoreResult,
 	ChromaBackendConfig,
 	ChromaPayloadAdapter,
-	PayloadTransformationConfig,
 } from './types.js';
 import { VectorStoreError, VectorStoreConnectionError, VectorDimensionError } from './types.js';
 import { Logger, createLogger } from '../../logger/index.js';
@@ -160,7 +159,7 @@ export class ChromaBackend implements VectorStore {
 	/**
 	 * Validate vector dimension
 	 */
-	private validateDimension(vector: number[], operation: string): void {
+	private validateDimension(vector: number[], _operation: string): void {
 		if (vector.length !== this.dimension) {
 			throw new VectorDimensionError(
 				`${ERROR_MESSAGES.INVALID_DIMENSION}: expected ${this.dimension}, got ${vector.length}`,
@@ -489,7 +488,7 @@ export class ChromaBackend implements VectorStore {
 				this.logger.debug(
 					`${LOG_PREFIXES.CHROMA} Collection already exists: ${this.collectionName}`
 				);
-			} catch (error) {
+			} catch (_error) {
 				// Collection doesn't exist, create it
 				this.logger.debug(`${LOG_PREFIXES.CHROMA} Creating collection ${this.collectionName}`);
 

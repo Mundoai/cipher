@@ -30,6 +30,9 @@ import { createConfigRoutes } from './routes/config.js';
 import { createLlmRoutes } from './routes/llm.js';
 import { createSearchRoutes } from './routes/search.js';
 import { createWebhookRoutes } from './routes/webhook.js';
+import { createApiKeyRoutes } from './routes/api-keys.js';
+import { ApiKeyStore } from './services/api-key-store.js';
+import { createAdminAuth } from './middleware/auth.js';
 
 export interface ApiServerConfig {
 	port: number;
@@ -62,12 +65,18 @@ export class ApiServer {
 	private wsEventSubscriber?: WebSocketEventSubscriber;
 	private heartbeatInterval?: NodeJS.Timeout;
 
+	// API Key management
+	private apiKeyStore: ApiKeyStore;
+
 	constructor(agent: MemAgent, config: ApiServerConfig) {
 		this.agent = agent;
 		this.config = config;
 
 		// Validate and set API prefix
 		this.apiPrefix = this.validateAndNormalizeApiPrefix(config.apiPrefix);
+
+		// Initialize API key store
+		this.apiKeyStore = new ApiKeyStore();
 
 		this.app = express();
 		this.setupMiddleware();
@@ -536,6 +545,32 @@ export class ApiServer {
 		}
 	}
 
+	/**
+	 * Initialize admin key for API key management.
+	 * If CIPHER_ADMIN_KEY is not set, generates one and logs it.
+	 */
+	private initializeAdminKey(): void {
+		if (!process.env.CIPHER_ADMIN_KEY) {
+			const { randomBytes } = require('crypto');
+			const adminKey = `admin-${randomBytes(24).toString('hex')}`;
+			process.env.CIPHER_ADMIN_KEY = adminKey;
+			logger.info(`[API Server] Generated admin key: ${adminKey}`, null, 'yellow');
+			logger.info(
+				'[API Server] Set CIPHER_ADMIN_KEY env var to persist this key across restarts',
+				null,
+				'yellow'
+			);
+		} else {
+			logger.info('[API Server] Using CIPHER_ADMIN_KEY from environment');
+		}
+
+		logger.info(
+			`[API Server] API key management available at ${this.apiPrefix}/admin/keys`,
+			null,
+			'green'
+		);
+	}
+
 	private setupMiddleware(): void {
 		// Enable trust proxy for reverse proxy support
 		this.app.set('trust proxy', true);
@@ -691,6 +726,13 @@ export class ApiServer {
 		this.app.use(this.buildApiRoute('/config'), createConfigRoutes(this.agent));
 		this.app.use(this.buildApiRoute('/search'), createSearchRoutes(this.agent));
 		this.app.use(this.buildApiRoute('/webhooks'), createWebhookRoutes(this.agent));
+
+		// Admin routes (protected by admin auth)
+		this.app.use(
+			this.buildApiRoute('/admin/keys'),
+			createAdminAuth(this.apiKeyStore),
+			createApiKeyRoutes(this.apiKeyStore)
+		);
 
 		// Legacy endpoint for MCP server connection
 		this.app.post(this.buildApiRoute('/connect-server'), (req: Request, res: Response) => {
@@ -855,6 +897,9 @@ export class ApiServer {
 	}
 
 	public async start(): Promise<void> {
+		// Initialize admin key for API key management
+		this.initializeAdminKey();
+
 		// Set up MCP server BEFORE starting HTTP server if transport type is provided
 		if (this.config.mcpTransportType) {
 			try {

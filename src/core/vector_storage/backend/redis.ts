@@ -98,7 +98,7 @@ export class RedisBackend implements VectorStore {
 	/**
 	 * Validate vector dimension
 	 */
-	private validateDimension(vector: number[], operation: string): void {
+	private validateDimension(vector: number[], _operation: string): void {
 		if (vector.length !== this.dimension) {
 			throw new VectorDimensionError(
 				`${ERROR_MESSAGES.INVALID_DIMENSION}: expected ${this.dimension}, got ${vector.length}`,
@@ -152,7 +152,7 @@ export class RedisBackend implements VectorStore {
 				this.indexCreated = true;
 				this.logger.debug(`${LOG_PREFIXES.REDIS} Index ${this.indexName} already exists`);
 				return;
-			} catch (error) {
+			} catch (_error) {
 				// Index doesn't exist, create it
 			}
 
@@ -434,11 +434,11 @@ export class RedisBackend implements VectorStore {
 			const searchResult = (await this.client.call('FT.SEARCH', ...searchArgs)) as any[];
 
 			const results: VectorStoreResult[] = [];
-			const totalResults = searchResult[0] as number;
+			const _totalResults = searchResult[0] as number;
 
 			// Parse search results (skip first element which is count)
 			for (let i = 1; i < searchResult.length; i += 2) {
-				const docKey = searchResult[i];
+				const _docKey = searchResult[i];
 				const docFields = searchResult[i + 1];
 
 				// Extract document data and score
@@ -599,7 +599,7 @@ export class RedisBackend implements VectorStore {
 				await this.client.call('FT.DROPINDEX', this.indexName);
 				this.indexCreated = false;
 				this.logger.info(`${LOG_PREFIXES.REDIS} Dropped index: ${this.indexName}`);
-			} catch (error) {
+			} catch (_error) {
 				// Index might not exist
 				this.logger.debug(
 					`${LOG_PREFIXES.REDIS} Index ${this.indexName} does not exist or already dropped`
@@ -667,7 +667,7 @@ export class RedisBackend implements VectorStore {
 
 			// Parse search results (skip first element which is count)
 			for (let i = 1; i < searchResult.length; i += 2) {
-				const docKey = searchResult[i];
+				const _docKey = searchResult[i];
 				const docFields = searchResult[i + 1];
 
 				// Extract document data

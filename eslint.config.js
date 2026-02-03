@@ -74,7 +74,7 @@ export default [
 			'no-unused-vars': 'off',
 			'@typescript-eslint/explicit-module-boundary-types': 'off',
 			'@typescript-eslint/no-explicit-any': 'off',
-			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
 			'no-dupe-class-members': 'off', // Allow TypeScript method overloading
 		},
 	},
@@ -89,6 +89,37 @@ export default [
 				// Node.js globals
 				console: 'readonly',
 				process: 'readonly',
+				Buffer: 'readonly',
+				setTimeout: 'readonly',
+				clearTimeout: 'readonly',
+				setInterval: 'readonly',
+				clearInterval: 'readonly',
+				setImmediate: 'readonly',
+				clearImmediate: 'readonly',
+			},
+		},
+		rules: {
+			'no-console': 'off',
+			'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+		},
+	},
+
+	// CommonJS .cjs files (e.g., scripts/)
+	{
+		files: ['**/*.cjs'],
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'commonjs',
+			globals: {
+				// Node.js globals
+				console: 'readonly',
+				process: 'readonly',
+				require: 'readonly',
+				module: 'readonly',
+				exports: 'readonly',
+				__dirname: 'readonly',
+				__filename: 'readonly',
+				global: 'readonly',
 				Buffer: 'readonly',
 				setTimeout: 'readonly',
 				clearTimeout: 'readonly',
