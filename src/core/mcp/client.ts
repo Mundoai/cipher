@@ -123,6 +123,7 @@ export class MCPClient implements IMCPClient {
 				},
 				{
 					capabilities: {
+						// @ts-expect-error - MCP SDK type definitions don't include tools at top level but it's supported at runtime
 						tools: {},
 						prompts: {},
 						resources: {},
