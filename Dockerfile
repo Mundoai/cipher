@@ -55,6 +55,7 @@ COPY --from=builder --chown=cipher:cipher /app/dist ./dist
 COPY --from=builder --chown=cipher:cipher /app/node_modules ./node_modules
 COPY --from=builder --chown=cipher:cipher /app/package.json ./
 COPY --from=builder --chown=cipher:cipher /app/memAgent ./memAgent
+COPY --from=builder --chown=cipher:cipher /app/scripts/docker-proxy.cjs ./scripts/docker-proxy.cjs
 
 # Create a minimal .env file for Docker (environment variables will be passed via docker)
 RUN echo "# Docker environment - variables passed via docker run" > .env
@@ -62,18 +63,22 @@ RUN echo "# Docker environment - variables passed via docker run" > .env
 # Environment variables
 ENV NODE_ENV=production \
     PORT=3000 \
+    API_PORT=3001 \
+    UI_PORT=3002 \
     CONFIG_FILE=/app/memAgent/cipher.yml \
     CIPHER_MODE=api
 
 # Switch to non-root user
 USER cipher
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "const http = require('http'); const req = http.request({host:'localhost',port:process.env.PORT||3000,path:'/health'}, (res) => process.exit(res.statusCode === 200 ? 0 : 1)); req.on('error', () => process.exit(1)); req.end();"
+# Health check - always check API server health (on API_PORT for ui mode, PORT for api mode)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD node -e "const http = require('http'); const port = process.env.CIPHER_MODE === 'ui' ? (process.env.API_PORT||3001) : (process.env.PORT||3000); const req = http.request({host:'localhost',port:port,path:'/health'}, (res) => process.exit(res.statusCode === 200 ? 0 : 1)); req.on('error', () => process.exit(1)); req.end();"
 
 # Single port for deployment platform
 EXPOSE $PORT
 
 # Server mode: configurable via CIPHER_MODE env var (api or ui)
-CMD ["sh", "-c", "node dist/src/app/index.cjs --mode $CIPHER_MODE --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE"]
+# In UI mode: starts API on API_PORT, Next.js on UI_PORT, reverse proxy on PORT
+# In API mode: starts API directly on PORT
+CMD ["sh", "-c", "if [ \"$CIPHER_MODE\" = \"ui\" ]; then node dist/src/app/index.cjs --mode api --port ${API_PORT:-3001} --host 0.0.0.0 --agent $CONFIG_FILE & PORT=${UI_PORT:-3002} HOSTNAME=0.0.0.0 node dist/src/app/ui/.next/standalone/server.js & sleep 2 && node scripts/docker-proxy.cjs; else node dist/src/app/index.cjs --mode $CIPHER_MODE --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE; fi"]

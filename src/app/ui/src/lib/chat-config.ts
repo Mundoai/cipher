@@ -5,13 +5,26 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // WebSocket URL configuration
 export function getWebSocketUrl(customUrl?: string): string {
-	let wsUrl = customUrl || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
+	let wsUrl = customUrl || process.env.NEXT_PUBLIC_WS_URL || '';
 
-	if (typeof window !== 'undefined') {
+	if (typeof window !== 'undefined' && !wsUrl) {
+		// Auto-detect WebSocket URL from current page origin
+		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		const hostname = window.location.hostname;
+
+		if (hostname === 'localhost' || hostname === '127.0.0.1') {
+			// Local development: connect directly to API server on port 3001
+			wsUrl = `ws://${hostname}:3001/ws`;
+		} else {
+			// Production/Docker: use same origin (reverse proxy routes /ws to API)
+			wsUrl = `${protocol}//${window.location.host}/ws`;
+		}
+	} else if (!wsUrl) {
+		wsUrl = 'ws://localhost:3001/ws';
+	} else if (typeof window !== 'undefined') {
 		try {
 			const urlObj = new URL(wsUrl);
 			if (urlObj.hostname === 'localhost') {
-				// Replace localhost with current hostname for network access
 				urlObj.hostname = window.location.hostname;
 				wsUrl = urlObj.toString();
 			}
