@@ -46,9 +46,9 @@ WORKDIR /app
 # Create non-root user
 RUN addgroup -g 1001 -S cipher && adduser -S cipher -u 1001
 
-# Create .cipher directory with proper permissions for database
-RUN mkdir -p /app/.cipher/database && \
-    chown -R cipher:cipher /app/.cipher
+# Create data directories with proper permissions for database and storage
+RUN mkdir -p /app/.cipher/database /app/data && \
+    chown -R cipher:cipher /app/.cipher /app/data
 
 # Copy only essential production files
 COPY --from=builder --chown=cipher:cipher /app/dist ./dist
