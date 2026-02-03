@@ -30,16 +30,33 @@ function isApiRoute(url) {
 }
 
 function proxyRequest(req, res, targetPort) {
+	// Rewrite Origin/Referer for API requests to bypass CORS
+	const headers = { ...req.headers };
+	if (targetPort === API_PORT) {
+		headers.origin = `http://localhost:${UI_PORT}`;
+		if (headers.referer) {
+			headers.referer = headers.referer.replace(/https?:\/\/[^/]+/, `http://localhost:${UI_PORT}`);
+		}
+	}
+
 	const options = {
 		hostname: '127.0.0.1',
 		port: targetPort,
 		path: req.url,
 		method: req.method,
-		headers: req.headers,
+		headers,
 	};
 
 	const proxyReq = http.request(options, (proxyRes) => {
-		res.writeHead(proxyRes.statusCode, proxyRes.headers);
+		// For API responses, override CORS headers to allow the real origin
+		if (targetPort === API_PORT) {
+			const responseHeaders = { ...proxyRes.headers };
+			responseHeaders['access-control-allow-origin'] = req.headers.origin || '*';
+			responseHeaders['access-control-allow-credentials'] = 'true';
+			res.writeHead(proxyRes.statusCode, responseHeaders);
+		} else {
+			res.writeHead(proxyRes.statusCode, proxyRes.headers);
+		}
 		proxyRes.pipe(res, { end: true });
 	});
 
