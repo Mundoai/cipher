@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ChatProvider } from '@/contexts/chat-context'
+import { AuthProvider } from '@/contexts/auth-context'
 import { QueryProvider } from '@/components/providers/query-provider'
 
 export const metadata: Metadata = {
@@ -22,9 +23,11 @@ export default function RootLayout({
 		<html lang="en" className="dark">
 			<body className="antialiased bg-background text-foreground">
         <QueryProvider>
-          <ChatProvider>
-            <div className="flex h-screen w-screen flex-col">{children}</div>
-          </ChatProvider>
+          <AuthProvider>
+            <ChatProvider>
+              <div className="flex h-screen w-screen flex-col">{children}</div>
+            </ChatProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
 		</html>

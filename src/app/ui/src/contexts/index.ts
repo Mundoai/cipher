@@ -5,3 +5,5 @@ export {
 	useChatMessages,
 	useChatStatus,
 } from './chat-context';
+
+export { AuthProvider, useAuth } from './auth-context';

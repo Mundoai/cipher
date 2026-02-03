@@ -82,6 +82,52 @@ cipher --mode mcp --mcp-transport-type sse --mcp-port 4000
 }
 ```
 
+### Connecting to a Remote Cipher Instance (Self-Hosted)
+
+If you have a Cipher instance deployed to a server (e.g., via Docker/Coolify), connect your IDE using the SSE transport over HTTPS. No local installation required.
+
+**Step 1: Get the server URL**
+
+Your Cipher instance exposes the MCP endpoint at:
+```
+https://your-cipher-domain.com/api/mcp/sse
+```
+
+**Step 2: Configure your IDE**
+
+Add this to `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "cipher": {
+      "type": "sse",
+      "url": "https://your-cipher-domain.com/api/mcp/sse"
+    }
+  }
+}
+```
+
+**IDE-specific locations:**
+
+| IDE | Config File |
+|-----|------------|
+| **Claude Code** | `.mcp.json` in project root |
+| **Cursor** | `.cursor/mcp.json` in project root |
+| **VS Code (Copilot)** | `.vscode/mcp.json` in project root |
+| **Windsurf** | `.windsurfrules/mcp.json` or MCP settings panel |
+| **Claude Desktop** | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) |
+
+**Step 3: Verify the connection**
+
+After restarting your IDE, the `ask_cipher` tool should appear in the MCP tools list. Test it by asking your AI assistant to use `ask_cipher` to store or retrieve context.
+
+**Troubleshooting remote connections:**
+
+- **Connection timeout**: Ensure the server is running (`curl https://your-domain.com/health`)
+- **SSE not working**: Verify the server was started with `--mcp-transport-type sse`
+- **No tools listed**: Check that the MCP endpoint returns a session (`curl -H "Accept: text/event-stream" https://your-domain.com/api/mcp/sse`)
+
 ### Streamable-HTTP Transport
 
 HTTP request/response with streaming. Endpoint base: `/http`.
@@ -227,20 +273,44 @@ Add to your Claude Desktop MCP configuration:
 
 ### Cursor
 
-Add to Cursor's MCP configuration. Cursor URL entries are treated as SSE:
+Add to `.cursor/mcp.json` in your project root.
 
+**Remote (self-hosted Cipher):**
 ```json
 {
   "mcpServers": {
-    "cipher-sse": { "url": "http://localhost:4000/sse" }
+    "cipher": {
+      "type": "sse",
+      "url": "https://your-cipher-domain.com/api/mcp/sse"
+    }
+  }
+}
+```
+
+**Local (Cipher installed locally):**
+```json
+{
+  "mcpServers": {
+    "cipher": { "url": "http://localhost:4000/sse" }
   }
 }
 ```
 
 ### Windsurf
 
-Similar to Claude Desktop configuration:
+**Remote (self-hosted Cipher):**
+```json
+{
+  "mcpServers": {
+    "cipher": {
+      "type": "sse",
+      "url": "https://your-cipher-domain.com/api/mcp/sse"
+    }
+  }
+}
+```
 
+**Local (Cipher installed locally):**
 ```json
 {
 	"mcpServers": {
@@ -259,8 +329,21 @@ Similar to Claude Desktop configuration:
 
 ### Claude Code
 
-For Claude Code integration:
+Add to `.mcp.json` in your project root.
 
+**Remote (self-hosted Cipher):**
+```json
+{
+  "mcpServers": {
+    "cipher": {
+      "type": "sse",
+      "url": "https://your-cipher-domain.com/api/mcp/sse"
+    }
+  }
+}
+```
+
+**Local (Cipher installed locally):**
 ```json
 {
 	"mcpServers": {
@@ -274,6 +357,22 @@ For Claude Code integration:
 			}
 		}
 	}
+}
+```
+
+### VS Code (GitHub Copilot)
+
+Add to `.vscode/mcp.json` in your project root.
+
+**Remote (self-hosted Cipher):**
+```json
+{
+  "mcpServers": {
+    "cipher": {
+      "type": "sse",
+      "url": "https://your-cipher-domain.com/api/mcp/sse"
+    }
+  }
 }
 ```
 
@@ -399,6 +498,17 @@ export OPENAI_API_KEY="sk-your-key"
 }
 ```
 **Solution:** Set `AGGREGATOR_CONFLICT_RESOLUTION=prefix` or use `first-wins`.
+
+**Docker/Self-Hosted SSE Not Working:**
+```
+Error: /api/mcp/sse returns 404
+```
+**Solution:** Ensure the server is started with `--mcp-transport-type sse`:
+```dockerfile
+# In Dockerfile CMD or docker run command:
+node dist/src/app/index.cjs --mode api --port 3000 --host 0.0.0.0 --agent /path/to/cipher.yml --mcp-transport-type sse
+```
+Without the `--mcp-transport-type sse` flag, the MCP SSE routes are not registered.
 
 ### Debug Mode
 

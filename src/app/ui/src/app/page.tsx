@@ -10,8 +10,10 @@ import { ServersPanel } from "@/components/servers-panel";
 import { ApiKeyPanel } from "@/components/api-key-panel";
 import { MessageList } from "@/components/message-list";
 import { InputArea } from "@/components/input-area";
+import { LoginScreen } from "@/components/login-screen";
 import { QuickAction } from "@/types/chat";
 import { convertChatMessageToMessage } from "@/lib/chat-utils";
+import { useAuth } from "@/contexts/auth-context";
 import { useState, useEffect } from "react";
 
 function MainChatInterface() {
@@ -184,5 +186,19 @@ function MainChatInterface() {
 }
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div className="animate-pulse text-muted-foreground text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
   return <MainChatInterface />;
 }

@@ -7,9 +7,11 @@ import {
   MessageSquare,
   Package,
   Key,
+  LogOut,
   X
 } from "lucide-react"
 import { ActionBarProps } from "@/types/chat"
+import { useAuth } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
 
 export function ActionBar({
@@ -21,6 +23,8 @@ export function ActionBar({
   isServersPanelOpen,
   isApiKeysPanelOpen
 }: ActionBarProps) {
+  const { logout } = useAuth()
+
   return (
     <div className="flex items-center space-x-2">
       {/* Search button - Temporarily disabled */}
@@ -86,6 +90,17 @@ export function ActionBar({
         ) : (
           <Key className="w-4 h-4" />
         )}
+      </Button>
+
+      {/* Logout */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={logout}
+        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+        title="Sign out"
+      >
+        <LogOut className="w-4 h-4" />
       </Button>
 
     </div>

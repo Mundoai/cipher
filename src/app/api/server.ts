@@ -735,6 +735,35 @@ export class ApiServer {
 			createApiKeyRoutes(this.apiKeyStore)
 		);
 
+		// Auth verification endpoint (for WebUI login)
+		this.app.post(this.buildApiRoute('/auth/verify'), (req: Request, res: Response) => {
+			const { key } = req.body;
+			if (!key || typeof key !== 'string') {
+				errorResponse(res, ERROR_CODES.VALIDATION_ERROR, 'Missing key', 400, undefined, req.requestId);
+				return;
+			}
+
+			const adminKey = process.env.CIPHER_ADMIN_KEY;
+
+			// Check admin key
+			if (adminKey && key === adminKey) {
+				successResponse(res, { role: 'admin' }, 200, req.requestId);
+				return;
+			}
+
+			// Check API key
+			if (key.startsWith('sk-')) {
+				const record = this.apiKeyStore.validate(key);
+				if (record) {
+					const role = (record.permissions.includes('*') || record.permissions.includes('admin:*')) ? 'admin' : 'user';
+					successResponse(res, { role, keyId: record.id, name: record.name }, 200, req.requestId);
+					return;
+				}
+			}
+
+			errorResponse(res, ERROR_CODES.UNAUTHORIZED, 'Invalid key', 401, undefined, req.requestId);
+		});
+
 		// Legacy endpoint for MCP server connection
 		this.app.post(this.buildApiRoute('/connect-server'), (req: Request, res: Response) => {
 			// Forward to MCP routes
