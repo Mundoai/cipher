@@ -14,10 +14,14 @@ function getDefaultBaseUrl(): string {
 }
 
 export class ApiClient {
-	private baseUrl: string;
+	private _baseUrl?: string;
 
 	constructor(baseUrl?: string) {
-		this.baseUrl = baseUrl || getDefaultBaseUrl();
+		this._baseUrl = baseUrl;
+	}
+
+	get baseUrl(): string {
+		return this._baseUrl || getDefaultBaseUrl();
 	}
 
 	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
