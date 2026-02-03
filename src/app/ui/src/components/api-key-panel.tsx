@@ -5,8 +5,8 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -15,8 +15,9 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog"
-import { Copy, Plus, Trash2, Key, Eye, EyeOff, AlertTriangle } from "lucide-react"
+import { Copy, Plus, Trash2, Key, AlertTriangle } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
+import { useAuth } from "@/contexts/auth-context"
 
 interface ApiKeyInfo {
   id: string
@@ -34,12 +35,10 @@ interface ApiKeyPanelProps {
 }
 
 export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
+  const { getAuthKey, role } = useAuth()
   const [keys, setKeys] = useState<ApiKeyInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [adminKey, setAdminKey] = useState("")
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showAdminKey, setShowAdminKey] = useState(false)
 
   // Create key dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -48,7 +47,8 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
   const [copied, setCopied] = useState(false)
 
   const fetchKeys = useCallback(async () => {
-    if (!adminKey) return
+    const authKey = getAuthKey()
+    if (!authKey) return
     setLoading(true)
     setError(null)
 
@@ -57,7 +57,7 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
         `${apiClient['baseUrl']}/api/admin/keys`,
         {
           headers: {
-            'Authorization': `Bearer ${adminKey}`,
+            'Authorization': `Bearer ${authKey}`,
             'Content-Type': 'application/json',
           },
         }
@@ -67,11 +67,9 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
 
       if (data.success) {
         setKeys(data.data || [])
-        setIsAuthenticated(true)
       } else {
         if (response.status === 401 || response.status === 403) {
-          setIsAuthenticated(false)
-          setError("Invalid admin key")
+          setError("Insufficient permissions to manage API keys")
         } else {
           setError(data.error?.message || "Failed to fetch keys")
         }
@@ -81,21 +79,18 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
     } finally {
       setLoading(false)
     }
-  }, [adminKey])
+  }, [getAuthKey])
 
   useEffect(() => {
-    if (isOpen && isAuthenticated) {
+    if (isOpen) {
       fetchKeys()
     }
-  }, [isOpen, isAuthenticated, fetchKeys])
-
-  const handleLogin = async () => {
-    if (!adminKey.trim()) return
-    await fetchKeys()
-  }
+  }, [isOpen, fetchKeys])
 
   const handleCreateKey = async () => {
     if (!newKeyName.trim()) return
+    const authKey = getAuthKey()
+    if (!authKey) return
 
     try {
       const response = await fetch(
@@ -103,7 +98,7 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${adminKey}`,
+            'Authorization': `Bearer ${authKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ name: newKeyName.trim() }),
@@ -125,13 +120,16 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
   }
 
   const handleRevokeKey = async (keyId: string) => {
+    const authKey = getAuthKey()
+    if (!authKey) return
+
     try {
       const response = await fetch(
         `${apiClient['baseUrl']}/api/admin/keys/${keyId}`,
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${adminKey}`,
+            'Authorization': `Bearer ${authKey}`,
             'Content-Type': 'application/json',
           },
         }
@@ -181,40 +179,10 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {!isAuthenticated ? (
-          <div className="space-y-3">
-            <Label className="text-xs">Admin Key</Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  type={showAdminKey ? "text" : "password"}
-                  placeholder="Enter admin key..."
-                  value={adminKey}
-                  onChange={(e) => setAdminKey(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                  className="pr-8 text-xs"
-                />
-                <button
-                  onClick={() => setShowAdminKey(!showAdminKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showAdminKey ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                </button>
-              </div>
-              <Button size="sm" onClick={handleLogin} disabled={loading}>
-                {loading ? "..." : "Login"}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Use the CIPHER_ADMIN_KEY from server logs
-            </p>
-            {error && (
-              <p className="text-xs text-destructive flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                {error}
-              </p>
-            )}
-          </div>
+        {loading && keys.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-4">
+            Loading keys...
+          </p>
         ) : (
           <>
             {error && (
@@ -224,18 +192,20 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
               </p>
             )}
 
-            <Button
-              size="sm"
-              onClick={() => setShowCreateDialog(true)}
-              className="w-full"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Create API Key
-            </Button>
+            {role === "admin" && (
+              <Button
+                size="sm"
+                onClick={() => setShowCreateDialog(true)}
+                className="w-full"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Create API Key
+              </Button>
+            )}
 
-            {keys.length === 0 ? (
+            {keys.length === 0 && !loading ? (
               <p className="text-xs text-muted-foreground text-center py-4">
-                No API keys yet. Create one to get started.
+                No API keys yet.{role === "admin" ? " Create one to get started." : ""}
               </p>
             ) : (
               <div className="space-y-2">
@@ -243,15 +213,17 @@ export function ApiKeyPanel({ isOpen }: ApiKeyPanelProps) {
                   <Card key={key.id} className="p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium truncate">{key.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRevokeKey(key.id)}
-                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                        title="Revoke key"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
+                      {role === "admin" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeKey(key.id)}
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          title="Revoke key"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">

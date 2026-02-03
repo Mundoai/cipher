@@ -12,6 +12,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   login: (key: string) => Promise<boolean>
   logout: () => void
+  getAuthKey: () => string | null
 }
 
 const AUTH_STORAGE_KEY = "cipher-auth-key"
@@ -79,11 +80,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ isAuthenticated: false, isLoading: false, role: null, error: null })
   }, [])
 
+  const getAuthKey = React.useCallback(() => {
+    return localStorage.getItem(AUTH_STORAGE_KEY)
+  }, [])
+
   const value = React.useMemo(() => ({
     ...state,
     login,
     logout,
-  }), [state, login, logout])
+    getAuthKey,
+  }), [state, login, logout, getAuthKey])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

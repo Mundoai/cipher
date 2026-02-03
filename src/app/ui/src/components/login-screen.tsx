@@ -30,7 +30,7 @@ export function LoginScreen() {
           </div>
           <h1 className="text-xl font-semibold">Cipher</h1>
           <p className="text-sm text-muted-foreground">
-            Enter your API key or admin key to continue
+            Sign in to access Cipher
           </p>
         </div>
 
@@ -38,7 +38,7 @@ export function LoginScreen() {
           <div className="relative">
             <Input
               type={showKey ? "text" : "password"}
-              placeholder="sk-... or admin key"
+              placeholder="Enter your access key"
               value={key}
               onChange={(e) => setKey(e.target.value)}
               className="pr-10"
@@ -75,7 +75,7 @@ export function LoginScreen() {
         </form>
 
         <p className="text-xs text-muted-foreground text-center">
-          Use an API key from the admin panel or the CIPHER_ADMIN_KEY from the server
+          Enter your access key to continue
         </p>
       </Card>
     </div>
