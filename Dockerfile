@@ -62,7 +62,8 @@ RUN echo "# Docker environment - variables passed via docker run" > .env
 # Environment variables
 ENV NODE_ENV=production \
     PORT=3000 \
-    CONFIG_FILE=/app/memAgent/cipher.yml
+    CONFIG_FILE=/app/memAgent/cipher.yml \
+    CIPHER_MODE=api
 
 # Switch to non-root user
 USER cipher
@@ -74,5 +75,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Single port for deployment platform
 EXPOSE $PORT
 
-# API server mode: REST APIs on single port
-CMD ["sh", "-c", "node dist/src/app/index.cjs --mode api --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE"]
+# Server mode: configurable via CIPHER_MODE env var (api or ui)
+CMD ["sh", "-c", "node dist/src/app/index.cjs --mode $CIPHER_MODE --port $PORT --host 0.0.0.0 --agent $CONFIG_FILE"]
