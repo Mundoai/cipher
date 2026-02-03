@@ -1,12 +1,23 @@
 import { ApiResponse, SessionInfo, MessageResponse, SystemHealth, LLMConfig } from '@/types/api';
 
-const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+function getDefaultBaseUrl(): string {
+	if (process.env.NEXT_PUBLIC_API_URL) {
+		return process.env.NEXT_PUBLIC_API_URL;
+	}
+	if (typeof window !== 'undefined') {
+		const hostname = window.location.hostname;
+		if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+			return window.location.origin;
+		}
+	}
+	return 'http://localhost:3001';
+}
 
 export class ApiClient {
 	private baseUrl: string;
 
 	constructor(baseUrl?: string) {
-		this.baseUrl = baseUrl || DEFAULT_BASE_URL;
+		this.baseUrl = baseUrl || getDefaultBaseUrl();
 	}
 
 	private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
