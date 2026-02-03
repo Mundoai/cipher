@@ -658,6 +658,7 @@ export class ApiServer {
 			},
 			standardHeaders: true,
 			legacyHeaders: false,
+			validate: { trustProxy: false },
 		});
 		// Apply rate limiting to API routes if prefix is configured
 		if (this.apiPrefix) {
